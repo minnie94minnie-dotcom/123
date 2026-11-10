@@ -1,947 +1,347 @@
 <!DOCTYPE html>
 <html lang="zh-TW" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>智慧建築微氣候監控系統 | Smart Microclimate System</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        cyber: {
-                            dark: '#0a0f1d',
-                            card: 'rgba(15, 23, 42, 0.75)',
-                            border: 'rgba(56, 189, 248, 0.2)',
-                            accent: '#00f0ff',
-                            neonGreen: '#10b981',
-                            neonYellow: '#f59e0b',
-                            neonRed: '#ef4444'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Three.js & STLLoader & OrbitControls -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
-        
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: #060913;
-            color: #e2e8f0;
-            overflow-x: hidden;
-            touch-action: manipulation;
-        }
-
-        .font-tech {
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        /* Glassmorphism Styles */
-        .glass-panel {
-            background: rgba(13, 22, 41, 0.75);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-        }
-
-        .glass-btn {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .glass-btn:active, .glass-btn.active {
-            background: rgba(14, 165, 233, 0.3);
-            border-color: #00f0ff;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.6);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(56, 189, 248, 0.4);
-            border-radius: 2px;
-        }
-
-        /* Pulsing Marker CSS overlay simulation fallback */
-        .pulse-ring {
-            box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.7);
-            animation: pulse 1.6s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.7); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(0, 240, 255, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 240, 255, 0); }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SmartStager AI AR｜3D 自由沙盒客廳</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+body{font-family:'Noto Sans TC',sans-serif;background:#060913;color:#e2e8f0;touch-action:manipulation}
+.font-tech{font-family:'Orbitron',sans-serif}
+.glass{background:rgba(13,22,41,.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(56,189,248,.2);box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.gb{background:rgba(30,41,59,.7);backdrop-filter:blur(8px);border:1px solid rgba(56,189,248,.3);transition:.25s}
+.gb:active,.gb.on{background:rgba(14,165,233,.3);border-color:#00f0ff;box-shadow:0 0 15px rgba(0,240,255,.4)}
+#cv canvas{display:block;touch-action:none}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(56,189,248,.4);border-radius:2px}
+</style>
 </head>
-<body class="h-screen w-screen flex flex-col justify-between overflow-hidden select-none">
+<body class="h-screen w-screen flex flex-col overflow-hidden select-none">
 
-    <!-- Top Navigation Header -->
-    <header class="fixed top-0 left-0 right-0 z-30 p-3 flex justify-between items-center glass-panel border-b border-cyan-900/40">
-        <div class="flex items-center space-x-2">
-            <div class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center border border-cyan-400/50 shadow-[0_0_10px_rgba(0,240,255,0.3)]">
-                <i class="fa-solid font-tech text-cyan-400 fa-building-circle-check text-base"></i>
-            </div>
-            <div>
-                <h1 class="text-xs font-tech font-bold text-cyan-300 tracking-wider">ECO-BUILD 3D</h1>
-                <p class="text-[10px] text-gray-400">微氣候智慧監控系統</p>
-            </div>
+<header class="z-30 p-3 flex justify-between items-center glass border-b border-cyan-900/40">
+  <div class="flex items-center space-x-2">
+    <div class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center border border-cyan-400/50"><i class="fa-solid fa-couch text-cyan-400"></i></div>
+    <div><h1 class="text-xs font-tech font-bold text-cyan-300 tracking-wider">SMARTSTAGER AI AR</h1><p class="text-[10px] text-gray-400">3D 自由沙盒・客廳</p></div>
+  </div>
+  <div class="glass px-2 py-1 rounded-full flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span><span class="text-[10px] font-tech text-emerald-400">SANDBOX</span></div>
+</header>
+
+<main class="relative flex-1 min-h-0">
+  <div id="cv" class="w-full h-full"></div>
+  <div class="absolute top-3 left-3 right-14 pointer-events-none">
+    <div class="glass px-3 py-1.5 rounded-full inline-flex items-center space-x-2"><i class="fa-solid fa-hand-pointer text-cyan-400 text-xs"></i><span id="pill" class="text-[11px] text-gray-300"></span></div>
+  </div>
+  <button data-v="ov" class="vb gb absolute top-3 right-3 w-8 h-8 rounded-full text-cyan-400"><i class="fa-solid fa-crosshairs text-xs"></i></button>
+  <div class="absolute left-3 top-14 flex flex-col space-y-2">
+    <button data-v="ov" class="vb gb w-9 h-9 rounded-xl text-cyan-300" title="客廳全景"><i class="fa-solid fa-cube"></i></button>
+    <button data-v="top" class="vb gb w-9 h-9 rounded-xl text-cyan-300" title="俯視平面"><i class="fa-solid fa-table-cells"></i></button>
+    <button data-v="sofa" class="vb gb w-9 h-9 rounded-xl text-cyan-300" title="沙發視角"><i class="fa-solid fa-eye"></i></button>
+    <button data-v="bal" class="vb gb w-9 h-9 rounded-xl text-cyan-300" title="陽台視角"><i class="fa-solid fa-door-open"></i></button>
+    <div class="border-t border-cyan-500/30 my-1"></div>
+    <button id="b-rot" class="gb w-9 h-9 rounded-xl text-amber-400" title="旋轉選取家具 90°"><i class="fa-solid fa-rotate-right"></i></button>
+    <button id="b-del" class="gb w-9 h-9 rounded-xl text-rose-400" title="刪除選取家具"><i class="fa-solid fa-trash"></i></button>
+  </div>
+  <div id="ts" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 glass px-4 py-2 rounded-full text-xs hidden whitespace-nowrap"></div>
+</main>
+
+<footer class="z-20 w-full glass border-t border-cyan-500/30 rounded-t-3xl">
+  <div id="tg" class="w-full py-2 flex flex-col items-center cursor-pointer">
+    <div class="w-12 h-1 bg-cyan-500/40 rounded-full mb-1"></div>
+    <div class="flex items-center space-x-4 text-[11px] text-gray-300">
+      <span><i class="fa-solid fa-couch text-cyan-400 mr-1"></i>家具 <b class="font-tech text-white" id="s-n">0</b></span>
+      <span><i class="fa-solid fa-vector-square text-emerald-400 mr-1"></i>佔地 <b class="font-tech text-white" id="s-a">0%</b></span>
+      <span><i class="fa-solid fa-tag text-amber-400 mr-1"></i><b class="font-tech text-white" id="s-p">NT$ 0</b></span>
+    </div>
+  </div>
+  <div id="bd">
+    <div class="px-3 pb-2 flex space-x-1 border-b border-slate-800">
+      <button data-tab="furn" class="gb on flex-1 py-1.5 rounded-lg text-xs text-cyan-300"><i class="fa-solid fa-couch block text-sm mb-0.5"></i>家具庫</button>
+      <button data-tab="ai" class="gb flex-1 py-1.5 rounded-lg text-xs text-gray-400"><i class="fa-solid fa-wand-magic-sparkles block text-sm mb-0.5"></i>AI 佈置</button>
+      <button data-tab="sun" class="gb flex-1 py-1.5 rounded-lg text-xs text-gray-400"><i class="fa-solid fa-sun block text-sm mb-0.5"></i>光照</button>
+      <button data-tab="room" class="gb flex-1 py-1.5 rounded-lg text-xs text-gray-400"><i class="fa-solid fa-ruler-combined block text-sm mb-0.5"></i>房間</button>
+    </div>
+    <div id="pn" class="p-3 max-h-52 overflow-y-auto">
+      <div data-pn="furn" class="grid grid-cols-2 gap-2" id="p-furn"></div>
+      <div data-pn="ai" class="hidden space-y-2">
+        <div class="grid grid-cols-3 gap-2 text-xs">
+          <button data-st="cozy" class="st gb on rounded-xl py-2 text-cyan-300">影音家庭</button>
+          <button data-st="minimalist" class="st gb rounded-xl py-2 text-gray-300">北歐極簡</button>
+          <button data-st="lounge" class="st gb rounded-xl py-2 text-gray-300">悠閒下午茶</button>
         </div>
-
-        <div class="flex items-center space-x-2">
-            <!-- STL File Upload Button -->
-            <label for="stl-upload" class="glass-btn text-xs px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 cursor-pointer text-cyan-300 hover:text-white">
-                <i class="fa-solid fa-file-import text-xs"></i>
-                <span class="text-[11px]">載入 STL</span>
-                <input type="file" id="stl-upload" accept=".stl" class="hidden">
-            </label>
-
-            <!-- Status Indicator -->
-            <div class="glass-panel px-2 py-1 rounded-full flex items-center space-x-1.5">
-                <span id="status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                <span class="text-[10px] font-tech text-emerald-400" id="status-text">LIVE</span>
-            </div>
+        <p id="ai-txt" class="text-[11px] text-slate-300 bg-cyan-950/40 p-2 rounded-lg border border-cyan-800/30">選擇風格，AI 會依房間尺寸自動排列已置入的家具（空房間時自動置入基本套組），之後仍可自由拖曳微調。</p>
+      </div>
+      <div data-pn="sun" class="hidden space-y-3">
+        <div class="text-xs text-gray-300 flex justify-between"><span>陽台落地窗日照 (06:00 - 18:00)</span><span id="sun-t" class="font-tech text-yellow-400">14:00</span></div>
+        <input type="range" id="sun-r" min="6" max="18" step="0.5" value="14" class="w-full accent-yellow-400">
+        <div class="text-[11px] text-gray-400">日照強度：<b id="sun-i" class="text-yellow-300">0%</b>（影響室內光線與家具投影）</div>
+      </div>
+      <div data-pn="room" class="hidden space-y-3 text-xs">
+        <div class="flex justify-between"><span>客廳寬度</span><b id="rw-v" class="font-tech text-cyan-400">5.0 m</b></div>
+        <input type="range" id="rw" min="3" max="8" step="0.1" value="5" class="w-full accent-cyan-400">
+        <div class="flex justify-between"><span>客廳深度</span><b id="rd-v" class="font-tech text-cyan-400">4.0 m</b></div>
+        <input type="range" id="rd" min="3" max="8" step="0.1" value="4" class="w-full accent-cyan-400">
+        <div class="grid grid-cols-4 gap-2">
+          <button id="b-save" class="gb rounded-lg py-1.5 text-cyan-300">儲存</button>
+          <button id="b-load" class="gb rounded-lg py-1.5 text-cyan-300">讀取</button>
+          <button id="b-json" class="gb rounded-lg py-1.5 text-cyan-300">匯出</button>
+          <button id="b-clr" class="gb rounded-lg py-1.5 text-rose-400">清空</button>
         </div>
-    </header>
-
-    <!-- 3D Canvas Container -->
-    <main class="relative w-full h-full flex-grow">
-        <div id="canvas-container" class="w-full h-full"></div>
-
-        <!-- 3D Viewport Touch Controls Hint & Mode Bar -->
-        <div class="absolute top-16 left-3 right-3 z-10 flex justify-between items-center pointer-events-none">
-            <div class="glass-panel px-3 py-1.5 rounded-full pointer-events-auto flex items-center space-x-2">
-                <i class="fa-solid fa-wind text-cyan-400 text-xs"></i>
-                <span class="text-[11px] text-gray-300" id="current-view-mode">當前模式：即時微氣候監控</span>
-            </div>
-            
-            <button id="reset-cam-btn" class="glass-btn pointer-events-auto w-8 h-8 rounded-full flex items-center justify-center text-cyan-400">
-                <i class="fa-solid fa-crosshairs text-xs"></i>
-            </button>
-        </div>
-
-        <!-- Camera & Model Rotation Quick Controls (Mobile Side Dock) -->
-        <div class="absolute left-3 top-32 z-10 flex flex-col space-y-2">
-            <!-- Camera Presets -->
-            <button class="cam-preset-btn glass-btn w-9 h-9 rounded-xl flex items-center justify-center text-cyan-300" data-view="roof" title="頂樓氣象站">
-                <i class="fa-solid fa-cloud-sun text-sm"></i>
-            </button>
-            <button class="cam-preset-btn glass-btn w-9 h-9 rounded-xl flex items-center justify-center text-cyan-300" data-view="solar" title="太陽能面板區">
-                <i class="fa-solid fa-solar-panel text-sm"></i>
-            </button>
-            <button class="cam-preset-btn glass-btn w-9 h-9 rounded-xl flex items-center justify-center text-cyan-300" data-view="courtyard" title="中庭微通風區">
-                <i class="fa-solid fa-tree text-sm"></i>
-            </button>
-            <button class="cam-preset-btn glass-btn w-9 h-9 rounded-xl flex items-center justify-center text-cyan-300" data-view="overview" title="建築全景">
-                <i class="fa-solid fa-building text-sm"></i>
-            </button>
-
-            <!-- Separator -->
-            <div class="w-full border-t border-cyan-500/30 my-1"></div>
-
-            <!-- STL Rotation Controls -->
-            <button id="rot-x-btn" class="glass-btn w-9 h-9 rounded-xl flex items-center justify-center text-amber-400 font-tech text-xs" title="X軸旋轉 90°">
-                X90°
-            </button>
-            <button id="rot-y-btn" class="glass-btn w-9 h-9 rounded-xl flex items-center justify-center text-amber-400 font-tech text-xs" title="Y軸旋轉 90°">
-                Y90°
-            </button>
-            <button id="rot-z-btn" class="glass-btn w-9 h-9 rounded-xl flex items-center justify-center text-amber-400 font-tech text-xs" title="Z軸旋轉 90°">
-                Z90°
-            </button>
-        </div>
-
-        <!-- Sensor Detail Popup Modal -->
-        <div id="sensor-modal" class="hidden absolute bottom-24 left-4 right-4 z-20 glass-panel p-4 rounded-2xl border border-cyan-400/50 shadow-2xl transition-all duration-300 transform translate-y-2">
-            <div class="flex justify-between items-start mb-2">
-                <div>
-                    <span class="text-[10px] font-tech text-cyan-400 uppercase tracking-widest" id="modal-node-id">NODE-01</span>
-                    <h3 class="text-base font-bold text-white flex items-center gap-2" id="modal-title">頂樓主氣象感測站</h3>
-                </div>
-                <button id="close-modal-btn" class="text-gray-400 hover:text-white p-1">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 my-3">
-                <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-700/50">
-                    <div class="text-[10px] text-gray-400">區域溫度</div>
-                    <div class="text-lg font-tech font-bold text-amber-400" id="modal-temp">28.4 °C</div>
-                </div>
-                <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-700/50">
-                    <div class="text-[10px] text-gray-400">相對濕度</div>
-                    <div class="text-lg font-tech font-bold text-cyan-400" id="modal-humidity">62 %</div>
-                </div>
-                <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-700/50">
-                    <div class="text-[10px] text-gray-400">微風風速</div>
-                    <div class="text-lg font-tech font-bold text-emerald-400" id="modal-wind">3.2 m/s</div>
-                </div>
-                <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-700/50">
-                    <div class="text-[10px] text-gray-400">空氣品質 (AQI)</div>
-                    <div class="text-lg font-tech font-bold text-cyan-300" id="modal-aqi">38 (優)</div>
-                </div>
-            </div>
-
-            <p class="text-xs text-slate-300 bg-cyan-950/40 p-2 rounded-lg border border-cyan-800/30" id="modal-desc">
-                頂樓風速良好，太陽輻射強，建議開啟高樓層智慧遮陽簾與綠能空調排熱系統。
-            </p>
-        </div>
-    </main>
-
-    <!-- Bottom Dashboard Drawer / Controls Slider Sheet -->
-    <footer class="z-20 w-full glass-panel border-t border-cyan-500/30 rounded-t-3xl transition-all duration-300">
-        <!-- Drawer Drag Handle & Quick Stats -->
-        <div id="drawer-toggle" class="w-full py-2 flex flex-col items-center justify-center cursor-pointer">
-            <div class="w-12 h-1 bg-cyan-500/40 rounded-full mb-1"></div>
-            <div class="flex items-center space-x-4 text-[11px] text-gray-300">
-                <span><i class="fa-solid fa-temperature-half text-amber-400 mr-1"></i>均溫: <b class="font-tech text-white" id="stat-avg-temp">26.8°C</b></span>
-                <span><i class="fa-solid fa-wind text-cyan-400 mr-1"></i>風速: <b class="font-tech text-white" id="stat-avg-wind">2.4m/s</b></span>
-                <span><i class="fa-solid fa-sun text-yellow-400 mr-1"></i>日照: <b class="font-tech text-white" id="stat-solar">840W/m²</b></span>
-            </div>
-        </div>
-
-        <!-- System Mode Tabs Bar -->
-        <div class="px-3 pb-2 flex justify-between space-x-1 border-b border-slate-800">
-            <button class="mode-tab-btn flex-1 py-1.5 rounded-lg text-xs font-medium text-center glass-btn active text-cyan-300" data-mode="realtime">
-                <i class="fa-solid fa-chart-line block text-sm mb-0.5"></i>即時監控
-            </button>
-            <button class="mode-tab-btn flex-1 py-1.5 rounded-lg text-xs font-medium text-center glass-btn text-gray-400" data-mode="wind">
-                <i class="fa-solid fa-wind block text-sm mb-0.5"></i>氣流模擬
-            </button>
-            <button class="mode-tab-btn flex-1 py-1.5 rounded-lg text-xs font-medium text-center glass-btn text-gray-400" data-mode="solar">
-                <i class="fa-solid fa-sun block text-sm mb-0.5"></i>光照分析
-            </button>
-            <button class="mode-tab-btn flex-1 py-1.5 rounded-lg text-xs font-medium text-center glass-btn text-gray-400" data-mode="eco">
-                <i class="fa-solid fa-leaf block text-sm mb-0.5"></i>節能建議
-            </button>
-        </div>
-
-        <!-- Dynamic Content Section -->
-        <div class="p-3 max-h-52 overflow-y-auto" id="dashboard-content">
-            <!-- Mode 1: Realtime Metrics & Chart -->
-            <div id="tab-content-realtime" class="space-y-3">
-                <div class="h-28 w-full">
-                    <canvas id="microclimate-chart"></canvas>
-                </div>
-            </div>
-
-            <!-- Mode 2: Wind Particle Controls -->
-            <div id="tab-content-wind" class="hidden space-y-3">
-                <div class="text-xs text-gray-300 flex justify-between">
-                    <span>風場氣流強度與流速調控</span>
-                    <span id="wind-speed-val" class="font-tech text-cyan-400">2.5 m/s</span>
-                </div>
-                <input type="range" id="wind-slider" min="0.5" max="8.0" step="0.1" value="2.5" class="w-full accent-cyan-400 bg-slate-800 rounded-lg h-2">
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    <div class="glass-panel p-2 rounded-xl border-slate-700">
-                        <div class="text-gray-400">當前主要風向</div>
-                        <div class="text-sm font-bold text-cyan-300 mt-1"><i class="fa-solid fa-compass mr-1"></i>西南風 (SSW)</div>
-                    </div>
-                    <div class="glass-panel p-2 rounded-xl border-slate-700">
-                        <div class="text-gray-400">建築中庭氣流效益</div>
-                        <div class="text-sm font-bold text-emerald-400 mt-1"><i class="fa-solid fa-circle-check mr-1"></i>自然對流良好</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Mode 3: Solar Radiation Controls -->
-            <div id="tab-content-solar" class="hidden space-y-3">
-                <div class="text-xs text-gray-300 flex justify-between">
-                    <span>太陽軌道與時間模擬 (06:00 - 18:00)</span>
-                    <span id="sun-time-val" class="font-tech text-yellow-400">14:00</span>
-                </div>
-                <input type="range" id="solar-slider" min="6" max="18" step="0.5" value="14" class="w-full accent-yellow-400 bg-slate-800 rounded-lg h-2">
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    <div class="glass-panel p-2 rounded-xl border-slate-700">
-                        <div class="text-gray-400">頂樓太陽能即時功率</div>
-                        <div class="text-sm font-bold text-yellow-300 mt-1">142.8 kW/h</div>
-                    </div>
-                    <div class="glass-panel p-2 rounded-xl border-slate-700">
-                        <div class="text-gray-400">建築受熱最高區域</div>
-                        <div class="text-sm font-bold text-amber-400 mt-1">西側外牆與立面</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Mode 4: Eco Recommendations -->
-            <div id="tab-content-eco" class="hidden space-y-2">
-                <div class="bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-500/30 flex items-start space-x-2">
-                    <i class="fa-solid fa-bolt text-emerald-400 text-base mt-0.5"></i>
-                    <div>
-                        <div class="text-xs font-bold text-emerald-300">中庭智慧天窗開啓建議</div>
-                        <div class="text-[11px] text-gray-300">外部風速與氣溫適宜，建議開啓 30% 天窗促進室內自然流場對流，預估可降低空調負荷 14%。</div>
-                    </div>
-                </div>
-                <div class="bg-cyan-950/40 p-2.5 rounded-xl border border-cyan-500/30 flex items-start space-x-2">
-                    <i class="fa-solid fa-droplet text-cyan-400 text-base mt-0.5"></i>
-                    <div>
-                        <div class="text-xs font-bold text-cyan-300">綠化露台水氣降溫啟動</div>
-                        <div class="text-[11px] text-gray-300">南側陽台高溫達 31°C，已觸發微霧噴滴降溫機制，預計 10 分鐘內將周邊區域降溫 2.2°C。</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- JavaScript Application Logic -->
-    <script>
-        // --- System State & Configuration ---
-        const state = {
-            currentMode: 'realtime',
-            selectedSensor: null,
-            windSpeed: 2.5,
-            solarHour: 14,
-            modelLoaded: false
-        };
-
-        // Sensor Node Data
-        const sensorData = [
-            {
-                id: 'NODE-01',
-                name: '頂樓氣象觀測站',
-                position: { x: 0, y: 16.5, z: 0 },
-                temp: 28.4,
-                humidity: 62,
-                wind: 4.2,
-                aqi: 35,
-                desc: '頂樓風速良好，太陽輻射強，建議開啟高樓層智慧遮陽簾與綠能空調排熱系統。'
-            },
-            {
-                id: 'NODE-02',
-                name: '中庭生態通風天井',
-                position: { x: 0, y: 5.0, z: 2.5 },
-                temp: 24.8,
-                humidity: 71,
-                wind: 1.8,
-                aqi: 22,
-                desc: '微氣候天井具備優良抽風煙囪效應，氣流穩定，室內空氣品質極佳。'
-            },
-            {
-                id: 'NODE-03',
-                name: '西側綠能太陽能立面',
-                position: { x: -6.5, y: 9.0, z: 0 },
-                temp: 31.2,
-                humidity: 53,
-                wind: 2.9,
-                aqi: 45,
-                desc: '下午太陽直射西牆，立面表面溫度較高，太陽能面板現正處於最大發電功率狀態。'
-            },
-            {
-                id: 'NODE-04',
-                name: '南側綠化景觀露台',
-                position: { x: 4.0, y: 3.0, z: -4.0 },
-                temp: 25.5,
-                humidity: 68,
-                wind: 2.1,
-                aqi: 28,
-                desc: '植栽區水氣蒸騰正常，周邊溫度較無綠化區域低約 2.5°C。'
-            }
-        ];
-
-        // --- Three.js Variables ---
-        let scene, camera, renderer, controls;
-        let buildingGroup, particleSystem;
-        let sensorMarkers = [];
-        let dirLight, ambientLight;
-        let raycaster, mouse;
-
-        // --- Initialization ---
-        window.addEventListener('load', () => {
-            initThreeJS();
-            initChartJS();
-            setupEventListeners();
-            animate();
-        });
-
-        // --- Three.js Scene Setup ---
-        function initThreeJS() {
-            const container = document.getElementById('canvas-container');
-            const width = container.clientWidth;
-            const height = container.clientHeight;
-
-            // Scene
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x060913);
-            scene.fog = new THREE.FogExp2(0x060913, 0.025);
-
-            // Camera
-            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-            camera.position.set(30, 22, 35);
-
-            // Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(width, height);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            container.appendChild(renderer.domElement);
-
-            // Controls
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
-            controls.maxPolarAngle = Math.PI / 2 - 0.05; // Don't go below ground
-            controls.minDistance = 10;
-            controls.maxDistance = 80;
-
-            // Lights
-            ambientLight = new THREE.AmbientLight(0x1a2b4c, 1.2);
-            scene.add(ambientLight);
-
-            dirLight = new THREE.DirectionalLight(0xfff5ea, 2.5);
-            dirLight.position.set(20, 40, 20);
-            dirLight.castShadow = true;
-            dirLight.shadow.mapSize.width = 2048;
-            dirLight.shadow.mapSize.height = 2048;
-            dirLight.shadow.camera.near = 0.5;
-            dirLight.shadow.camera.far = 150;
-            const d = 25;
-            dirLight.shadow.camera.left = -d;
-            dirLight.shadow.camera.right = d;
-            dirLight.shadow.camera.top = d;
-            dirLight.shadow.camera.bottom = -d;
-            scene.add(dirLight);
-
-            // Cyan fill rim light for tech aesthetic
-            const rimLight = new THREE.DirectionalLight(0x00f0ff, 1.5);
-            rimLight.position.set(-20, 10, -20);
-            scene.add(rimLight);
-
-            // Grid & Ground Visuals
-            const gridHelper = new THREE.GridHelper(80, 40, 0x00f0ff, 0x1e293b);
-            gridHelper.position.y = -0.01;
-            scene.add(gridHelper);
-
-            // Ground Reflective Disc
-            const groundGeo = new THREE.CircleGeometry(40, 64);
-            const groundMat = new THREE.MeshStandardMaterial({
-                color: 0x0b1329,
-                roughness: 0.8,
-                metalness: 0.2
-            });
-            const ground = new THREE.Mesh(groundGeo, groundMat);
-            ground.rotation.x = -Math.PI / 2;
-            ground.receiveShadow = true;
-            scene.add(ground);
-
-            // Raycaster setup
-            raycaster = new THREE.Raycaster();
-            mouse = new THREE.Vector2();
-
-            // Create Group for Building
-            buildingGroup = new THREE.Group();
-            scene.add(buildingGroup);
-
-            // Generate Procedural Smart Building (Default Model)
-            createProceduralBuilding();
-
-            // Add Weather Hotspots Sensors
-            createSensorMarkers();
-
-            // Create Dynamic Airflow Wind Particle Field
-            createWindParticles();
-
-            // Window Resize Handler
-            window.addEventListener('resize', onWindowResize);
-        }
-
-        // --- Procedural 3D Smart Building Model Generator ---
-        function createProceduralBuilding() {
-            // Clear existing model children
-            while(buildingGroup.children.length > 0) { 
-                buildingGroup.remove(buildingGroup.children[0]); 
-            }
-
-            const glassMat = new THREE.MeshPhysicalMaterial({
-                color: 0x1e3a8a,
-                metalness: 0.1,
-                roughness: 0.1,
-                transmission: 0.6,
-                transparent: true,
-                opacity: 0.85,
-                ior: 1.5
-            });
-
-            const frameMat = new THREE.MeshStandardMaterial({
-                color: 0x334155,
-                metalness: 0.8,
-                roughness: 0.2
-            });
-
-            const neonCyanMat = new THREE.MeshBasicMaterial({
-                color: 0x00f0ff,
-                wireframe: true
-            });
-
-            // Tower 1 (Main Tower)
-            const mainTowerGeo = new THREE.BoxGeometry(10, 15, 10);
-            const mainTower = new THREE.Mesh(mainTowerGeo, glassMat);
-            mainTower.position.y = 7.5;
-            mainTower.castShadow = true;
-            mainTower.receiveShadow = true;
-            buildingGroup.add(mainTower);
-
-            // Inner Tech Core Glow
-            const coreGeo = new THREE.BoxGeometry(9.8, 14.8, 9.8);
-            const coreMesh = new THREE.Mesh(coreGeo, neonCyanMat);
-            coreMesh.position.y = 7.5;
-            buildingGroup.add(coreMesh);
-
-            // Top Weather Station Structure
-            const roofGeo = new THREE.CylinderGeometry(3, 4, 2, 8);
-            const roofMesh = new THREE.Mesh(roofGeo, frameMat);
-            roofMesh.position.y = 16;
-            roofMesh.castShadow = true;
-            buildingGroup.add(roofMesh);
-
-            // Solar Roof Panel
-            const solarGeo = new THREE.BoxGeometry(6, 0.2, 6);
-            const solarMat = new THREE.MeshStandardMaterial({ color: 0x1e1b4b, roughness: 0.1, metalness: 0.9 });
-            const solar = new THREE.Mesh(solarGeo, solarMat);
-            solar.position.set(0, 17.1, 0);
-            buildingGroup.add(solar);
-
-            // Annex Podium (Green Courtyard Wing)
-            const annexGeo = new THREE.BoxGeometry(14, 5, 8);
-            const annex = new THREE.Mesh(annexGeo, glassMat);
-            annex.position.set(4, 2.5, -2);
-            annex.castShadow = true;
-            buildingGroup.add(annex);
-
-            // Atrium Void Frame
-            const atriumGeo = new THREE.TorusGeometry(2, 0.3, 16, 32);
-            const atrium = new THREE.Mesh(atriumGeo, frameMat);
-            atrium.rotation.x = Math.PI / 2;
-            atrium.position.set(0, 5, 2.5);
-            buildingGroup.add(atrium);
-
-            state.modelLoaded = true;
-        }
-
-        // --- Load User STL File ---
-        function loadSTLFile(file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const contents = e.target.result;
-                const loader = new THREE.STLLoader();
-                const geometry = loader.parse(contents);
-
-                // Clear procedural building
-                while(buildingGroup.children.length > 0) { 
-                    buildingGroup.remove(buildingGroup.children[0]); 
-                }
-
-                // Reset group orientation
-                buildingGroup.rotation.set(0, 0, 0);
-
-                // STL models usually use Z-up, rotate geometry by -90 deg on X axis to convert to Three.js Y-up
-                geometry.rotateX(-Math.PI / 2);
-
-                // Compute bounding box for auto-scaling & centering
-                geometry.computeBoundingBox();
-                const bbox = geometry.boundingBox;
-                const center = new THREE.Vector3();
-                bbox.getCenter(center);
-                const size = new THREE.Vector3();
-                bbox.getSize(size);
-
-                const maxDim = Math.max(size.x, size.y, size.z);
-                const scale = 15 / maxDim; // Normalize scale to ~15 units
-
-                const stlMat = new THREE.MeshStandardMaterial({
-                    color: 0x38bdf8,
-                    metalness: 0.5,
-                    roughness: 0.3,
-                    wireframe: false
-                });
-
-                const mesh = new THREE.Mesh(geometry, stlMat);
-                // Center mesh so base rests on ground
-                geometry.translate(-center.x, -center.y + size.y / 2, -center.z);
-                mesh.scale.set(scale, scale, scale);
-                mesh.castShadow = true;
-                mesh.receiveShadow = true;
-
-                buildingGroup.add(mesh);
-
-                // Wireframe Overlay
-                const wireframeGeo = new THREE.WireframeGeometry(geometry);
-                const wireframeMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.2 });
-                const wireframe = new THREE.LineSegments(wireframeGeo, wireframeMat);
-                wireframe.scale.set(scale, scale, scale);
-                buildingGroup.add(wireframe);
-
-                document.getElementById('status-text').innerText = 'CUSTOM STL';
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        // --- 3D Hotspot Sensor Markers ---
-        function createSensorMarkers() {
-            // Clear existing markers
-            sensorMarkers.forEach(m => scene.remove(m));
-            sensorMarkers = [];
-
-            sensorData.forEach(data => {
-                const markerGroup = new THREE.Group();
-                markerGroup.position.set(data.position.x, data.position.y, data.position.z);
-                markerGroup.userData = data;
-
-                // Glowing Sphere
-                const sphereGeo = new THREE.SphereGeometry(0.5, 16, 16);
-                const sphereMat = new THREE.MeshBasicMaterial({
-                    color: 0x00f0ff,
-                    transparent: true,
-                    opacity: 0.9
-                });
-                const sphere = new THREE.Mesh(sphereGeo, sphereMat);
-                markerGroup.add(sphere);
-
-                // Outer Radar Pulsing Ring
-                const ringGeo = new THREE.RingGeometry(0.7, 0.9, 32);
-                const ringMat = new THREE.MeshBasicMaterial({
-                    color: 0x00f0ff,
-                    side: THREE.DoubleSide,
-                    transparent: true,
-                    opacity: 0.6
-                });
-                const ring = new THREE.Mesh(ringGeo, ringMat);
-                ring.rotation.x = Math.PI / 2;
-                markerGroup.add(ring);
-
-                scene.add(markerGroup);
-                sensorMarkers.push(markerGroup);
-            });
-        }
-
-        // --- Airflow Wind Particles ---
-        function createWindParticles() {
-            const count = 400;
-            const geometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(count * 3);
-            const velocities = new Float32Array(count);
-
-            for (let i = 0; i < count; i++) {
-                positions[i * 3] = (Math.random() - 0.5) * 40;
-                positions[i * 3 + 1] = Math.random() * 20 + 0.5;
-                positions[i * 3 + 2] = (Math.random() - 0.5) * 40;
-
-                velocities[i] = Math.random() * 0.1 + 0.05;
-            }
-
-            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 1));
-
-            // Custom Texture Particle Dot
-            const particleMat = new THREE.PointsMaterial({
-                color: 0x38bdf8,
-                size: 0.35,
-                transparent: true,
-                opacity: 0.6,
-                blending: THREE.AdditiveBlending
-            });
-
-            particleSystem = new THREE.Points(geometry, particleMat);
-            scene.add(particleSystem);
-        }
-
-        function updateWindParticles() {
-            if (!particleSystem) return;
-            const positions = particleSystem.geometry.attributes.position.array;
-            const count = positions.length / 3;
-
-            for (let i = 0; i < count; i++) {
-                // Move along wind direction (X/Z diagonal flow)
-                positions[i * 3] += state.windSpeed * 0.04;
-                positions[i * 3 + 2] += state.windSpeed * 0.02;
-
-                // Reset position if boundary crossed
-                if (positions[i * 3] > 25) positions[i * 3] = -25;
-                if (positions[i * 3 + 2] > 25) positions[i * 3 + 2] = -25;
-            }
-
-            particleSystem.geometry.attributes.position.needsUpdate = true;
-        }
-
-        // --- Chart.js Integration ---
-        let microclimateChart;
-        function initChartJS() {
-            const ctx = document.getElementById('microclimate-chart').getContext('2d');
-            
-            // Gradient fill for temp
-            const tempGradient = ctx.createLinearGradient(0, 0, 0, 100);
-            tempGradient.addColorStop(0, 'rgba(245, 158, 11, 0.4)');
-            tempGradient.addColorStop(1, 'rgba(245, 158, 11, 0.0)');
-
-            microclimateChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
-                    datasets: [
-                        {
-                            label: '室外氣溫 (°C)',
-                            data: [22, 21, 24, 29, 28, 25, 23],
-                            borderColor: '#f59e0b',
-                            backgroundColor: tempGradient,
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 2
-                        },
-                        {
-                            label: '微風風速 (m/s)',
-                            data: [1.2, 1.0, 2.1, 3.8, 3.2, 2.0, 1.5],
-                            borderColor: '#00f0ff',
-                            borderWidth: 1.5,
-                            borderDash: [3, 3],
-                            fill: false,
-                            tension: 0.3,
-                            pointRadius: 0
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#94a3b8',
-                                font: { size: 10 }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: 'rgba(51, 65, 85, 0.3)' },
-                            ticks: { color: '#64748b', font: { size: 9 } }
-                        },
-                        y: {
-                            grid: { color: 'rgba(51, 65, 85, 0.3)' },
-                            ticks: { color: '#64748b', font: { size: 9 } }
-                        }
-                    }
-                }
-            });
-        }
-
-        // --- User Interaction & Events ---
-        function setupEventListeners() {
-            // Raycasting Click / Tap for 3D Sensor Hotspots
-            const canvasContainer = document.getElementById('canvas-container');
-            
-            function handleTap(event) {
-                const rect = renderer.domElement.getBoundingClientRect();
-                const clientX = event.clientX || (event.touches && event.touches[0].clientX);
-                const clientY = event.clientY || (event.touches && event.touches[0].clientY);
-
-                if (!clientX || !clientY) return;
-
-                mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-                mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
-
-                raycaster.setFromCamera(mouse, camera);
-                
-                // Intersect with sensor markers
-                const intersects = raycaster.intersectObjects(sensorMarkers.map(m => m.children[0]));
-
-                if (intersects.length > 0) {
-                    const clickedSensor = intersects[0].object.parent.userData;
-                    openSensorModal(clickedSensor);
-                }
-            }
-
-            canvasContainer.addEventListener('click', handleTap);
-
-            // Close Sensor Modal
-            document.getElementById('close-modal-btn').addEventListener('click', () => {
-                document.getElementById('sensor-modal').classList.add('hidden');
-            });
-
-            // Camera View Presets
-            document.querySelectorAll('.cam-preset-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const view = e.currentTarget.getAttribute('data-view');
-                    switchCameraView(view);
-                });
-            });
-
-            // Reset Camera
-            document.getElementById('reset-cam-btn').addEventListener('click', () => {
-                switchCameraView('overview');
-            });
-
-            // Model Rotation Quick Control Buttons (X90, Y90, Z90)
-            document.getElementById('rot-x-btn').addEventListener('click', () => {
-                if (buildingGroup) buildingGroup.rotation.x += Math.PI / 2;
-            });
-            document.getElementById('rot-y-btn').addEventListener('click', () => {
-                if (buildingGroup) buildingGroup.rotation.y += Math.PI / 2;
-            });
-            document.getElementById('rot-z-btn').addEventListener('click', () => {
-                if (buildingGroup) buildingGroup.rotation.z += Math.PI / 2;
-            });
-
-            // Mode Tab Switcher
-            document.querySelectorAll('.mode-tab-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    document.querySelectorAll('.mode-tab-btn').forEach(b => {
-                        b.classList.remove('active', 'text-cyan-300');
-                        b.classList.add('text-gray-400');
-                    });
-                    e.currentTarget.classList.add('active', 'text-cyan-300');
-                    e.currentTarget.classList.remove('text-gray-400');
-
-                    const mode = e.currentTarget.getAttribute('data-mode');
-                    switchDashboardMode(mode);
-                });
-            });
-
-            // Wind Slider
-            document.getElementById('wind-slider').addEventListener('input', (e) => {
-                state.windSpeed = parseFloat(e.target.value);
-                document.getElementById('wind-speed-val').innerText = `${state.windSpeed.toFixed(1)} m/s`;
-                document.getElementById('stat-avg-wind').innerText = `${state.windSpeed.toFixed(1)}m/s`;
-            });
-
-            // Solar Slider
-            document.getElementById('solar-slider').addEventListener('input', (e) => {
-                state.solarHour = parseFloat(e.target.value);
-                const hours = Math.floor(state.solarHour);
-                const mins = state.solarHour % 1 === 0 ? '00' : '30';
-                document.getElementById('sun-time-val').innerText = `${hours}:${mins}`;
-
-                // Update Directional Light Position based on simulated sun position
-                const angle = ((state.solarHour - 6) / 12) * Math.PI; // 6:00 (0 rad) to 18:00 (PI rad)
-                dirLight.position.x = 40 * Math.cos(angle);
-                dirLight.position.y = 40 * Math.sin(angle);
-            });
-
-            // File Upload STL
-            document.getElementById('stl-upload').addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    loadSTLFile(file);
-                }
-            });
-        }
-
-        // --- Camera View Transition Helper ---
-        function switchCameraView(viewKey) {
-            const targets = {
-                overview: { pos: { x: 30, y: 22, z: 35 }, lookAt: { x: 0, y: 5, z: 0 } },
-                roof: { pos: { x: 5, y: 22, z: 12 }, lookAt: { x: 0, y: 16, z: 0 } },
-                solar: { pos: { x: -18, y: 14, z: 8 }, lookAt: { x: -6, y: 9, z: 0 } },
-                courtyard: { pos: { x: 12, y: 8, z: 14 }, lookAt: { x: 0, y: 4, z: 2.5 } }
-            };
-
-            const target = targets[viewKey] || targets.overview;
-            
-            // Simple animate camera position
-            let progress = 0;
-            const startPos = camera.position.clone();
-            const endPos = new THREE.Vector3(target.pos.x, target.pos.y, target.pos.z);
-
-            function lerpCamera() {
-                progress += 0.04;
-                camera.position.lerpVectors(startPos, endPos, progress);
-                controls.target.set(target.lookAt.x, target.lookAt.y, target.lookAt.z);
-                controls.update();
-
-                if (progress < 1.0) {
-                    requestAnimationFrame(lerpCamera);
-                }
-            }
-            lerpCamera();
-        }
-
-        // --- Open Sensor Data Dialog ---
-        function openSensorModal(sensor) {
-            document.getElementById('modal-node-id').innerText = sensor.id;
-            document.getElementById('modal-title').innerText = sensor.name;
-            document.getElementById('modal-temp').innerText = `${sensor.temp} °C`;
-            document.getElementById('modal-humidity').innerText = `${sensor.humidity} %`;
-            document.getElementById('modal-wind').innerText = `${sensor.wind} m/s`;
-            document.getElementById('modal-aqi').innerText = `${sensor.aqi} (優)`;
-            document.getElementById('modal-desc').innerText = sensor.desc;
-
-            document.getElementById('sensor-modal').classList.remove('hidden');
-        }
-
-        // --- Switch Dashboard Mode UI ---
-        function switchDashboardMode(mode) {
-            state.currentMode = mode;
-            const modeTitles = {
-                realtime: '當前模式：即時微氣候監控',
-                wind: '當前模式：氣流場模擬視角',
-                solar: '當前模式：太陽光照與受熱分析',
-                eco: '當前模式：智慧節能與通風建議'
-            };
-            document.getElementById('current-view-mode').innerText = modeTitles[mode];
-
-            // Toggle Content Visibility
-            document.getElementById('tab-content-realtime').classList.toggle('hidden', mode !== 'realtime');
-            document.getElementById('tab-content-wind').classList.toggle('hidden', mode !== 'wind');
-            document.getElementById('tab-content-solar').classList.toggle('hidden', mode !== 'solar');
-            document.getElementById('tab-content-eco').classList.toggle('hidden', mode !== 'eco');
-        }
-
-        // --- Window Resize ---
-        function onWindowResize() {
-            const container = document.getElementById('canvas-container');
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
-        }
-
-        // --- Render Loop ---
-        function animate() {
-            requestAnimationFrame(animate);
-
-            // Gentle building float rotation
-            if (buildingGroup) {
-                buildingGroup.rotation.y += 0.0015;
-            }
-
-            // Animate Hotspot Markers scale Pulse
-            const time = Date.now() * 0.003;
-            sensorMarkers.forEach(marker => {
-                const ring = marker.children[1];
-                if (ring) {
-                    const scale = 1 + Math.sin(time * 2) * 0.2;
-                    ring.scale.set(scale, scale, scale);
-                }
-            });
-
-            // Update Particle Animation
-            updateWindParticles();
-
-            controls.update();
-            renderer.render(scene, camera);
-        }
-    </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const GLB = 'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/SheenChair/glTF-Binary/SheenChair.glb';
+// glb: 有檔案就載入真實模型；找不到時自動改用內建程序化家具 (w/d 單位 cm)
+const FURN = [
+  {id:'sheen-chair', n:'北歐絲絨單人椅', price:5800, glb:GLB, sc:1, w:85, d:80, t:'chair', c:'#A37A5C', ic:'fa-chair'},
+  {id:'sectional-sofa-xmh9ay', n:'當代 L 型組合沙發', price:45800, glb:'An_L-shaped _modular_ sectional_sofa.glb', sc:2.6, off:180, w:260, d:164, t:'sofa', c:'#D9D4CC', ic:'fa-couch'},
+  {id:'sectional-light-xmh9ay', n:'木製三腳架落地燈', price:8200, glb:'A_floor_lamp_with_a_wooden_tripod_base.glb', sc:1.3, w:50, d:50, t:'lamp', c:'#b08a5a', ic:'fa-lightbulb'},
+  {id:'sectional-caffe-table-xmh9ay', n:'洞石雕塑茶几', price:28800, glb:'An_oval_coffee_table_crafted_from.glb', sc:2, w:120, d:70, t:'table', c:'#D6CFC7', ic:'fa-circle'},
+  {id:'sectional-media_console-xmh9ay', n:'現代漆面電視櫃', price:29990, glb:'A_sleek_modern media_console _with_a.glb', sc:2.6, w:180, d:45, t:'tv', c:'#A8B0BA', ic:'fa-tv'},
+  {id:'sectional-floating_wall-mounted-xmh9ay', n:'極簡壁掛電視櫃', price:39990, glb:'A_modern_ floating_wall-mounted.glb', sc:2.6, w:200, d:35, t:'tv', c:'#C9C5BD', lift:.35, ic:'fa-tv'}
+];
+const DEF = [FURN[4].id, FURN[1].id, FURN[3].id, FURN[0].id, FURN[2].id];
+const TXT = {
+  cozy:'溫馨影音家庭：電視櫃貼後牆，L 型沙發與之相對，茶几居中，單椅與落地燈圍出聊天角落。',
+  minimalist:'北歐極簡：家具貼牆擺放，沙發靠左牆，中央保留最大動線，落地燈收在角落。',
+  lounge:'悠閒下午茶：沙發與單椅斜角對談，茶几居中，電視退到側牆，營造放鬆氛圍。'
+};
+const room = {w:5, d:4, H:2.4}, BAL = 2.2;
+let scene, camera, renderer, controls, roomG, sun, amb, selBox, sel = null, uid = 0, drag = null, down = null, tw = null, warned = false;
+const items = [], gl = new THREE.GLTFLoader(), cache = {}, bad = new Set();
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), plane = new THREE.Plane(new THREE.Vector3(0,1,0), 0), hit = new THREE.Vector3();
+const fOf = o => FURN.find(f => f.id === o.userData.fid);
+
+function toast(m){const e=$('ts');e.textContent=m;e.classList.remove('hidden');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.add('hidden'),2800)}
+
+/* ---------- 場景 ---------- */
+function init(){
+  const box=$('cv');
+  scene=new THREE.Scene();scene.background=new THREE.Color(0x0b1120);scene.fog=new THREE.FogExp2(0x0b1120,.03);
+  camera=new THREE.PerspectiveCamera(50,box.clientWidth/box.clientHeight,.1,100);
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;
+  box.appendChild(renderer.domElement);
+  controls=new THREE.OrbitControls(camera,renderer.domElement);
+  controls.enableDamping=true;controls.maxPolarAngle=Math.PI/2-.05;controls.minDistance=1;controls.maxDistance=14;
+  amb=new THREE.AmbientLight(0xffffff,1.2);scene.add(amb);
+  sun=new THREE.DirectionalLight(0xfff1dd,2.2);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.bias=-.001;
+  Object.assign(sun.shadow.camera,{left:-8,right:8,top:8,bottom:-8,near:.5,far:30});scene.add(sun);
+  const fill=new THREE.DirectionalLight(0xbae6fd,1);fill.position.set(-5,3,-5);scene.add(fill);
+  const grid=new THREE.GridHelper(40,40,0x00f0ff,0x1e293b);grid.position.y=-.02;scene.add(grid);
+  roomG=new THREE.Group();scene.add(roomG);
+  selBox=new THREE.Box3Helper(new THREE.Box3(),0x00f0ff);selBox.visible=false;scene.add(selBox);
+  buildRoom();setSun(14);
+  camera.position.set(0,3.6,room.d/2+3.4);controls.target.set(0,.5,0);
+  bindInput();
+  new ResizeObserver(()=>{camera.aspect=box.clientWidth/box.clientHeight;camera.updateProjectionMatrix();renderer.setSize(box.clientWidth,box.clientHeight)}).observe(box);
+  renderer.setAnimationLoop(()=>{
+    if(tw){tw.k=Math.min(1,tw.k+.04);const e=tw.k*tw.k*(3-2*tw.k);camera.position.lerpVectors(tw.p0,tw.p1,e);controls.target.lerpVectors(tw.t0,tw.t1,e);if(tw.k>=1)tw=null}
+    if(sel)selBox.box.setFromObject(sel);
+    controls.update();renderer.render(scene,camera);
+  });
+}
+
+function floorTex(){
+  const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');
+  x.fillStyle='#f0d3b1';x.fillRect(0,0,512,512);x.strokeStyle='#d4b38a';x.lineWidth=1.5;
+  for(let y=0;y<512;y+=32){x.beginPath();x.moveTo(0,y);x.lineTo(512,y);x.stroke();
+    for(let u=(y/32%3)*40;u<512;u+=120){x.beginPath();x.moveTo(u,y);x.lineTo(u,y+32);x.stroke()}}
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(room.w*1.5,room.d*1.5);return t;
+}
+
+function buildRoom(){
+  while(roomG.children.length)roomG.remove(roomG.children[0]);
+  const {w:W,d:D,H}=room,wz=D*.55,sw=(D-wz)/2,
+  wm=new THREE.MeshStandardMaterial({color:0xf3f4f6,roughness:.9}),
+  gm=new THREE.MeshStandardMaterial({color:0xbfe6ff,transparent:true,opacity:.2,side:THREE.DoubleSide}),
+  fm=new THREE.MeshStandardMaterial({color:0x1e293b,metalness:.8,roughness:.5}),
+  P=(w,h,m,x,y,z,rx,ry)=>{const o=new THREE.Mesh(new THREE.PlaneGeometry(w,h),m);o.position.set(x,y,z);o.rotation.set(rx||0,ry||0,0);o.receiveShadow=true;roomG.add(o)},
+  B=(w,h,d,m,x,y,z)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;roomG.add(o)};
+  P(W,D,new THREE.MeshStandardMaterial({map:floorTex(),roughness:.35}),0,0,0,-Math.PI/2);
+  P(W,H,wm,0,H/2,-D/2);P(D,H,wm,-W/2,H/2,0,0,Math.PI/2);
+  P(sw,H,wm,W/2,H/2,D/2-sw/2,0,-Math.PI/2);P(sw,H,wm,W/2,H/2,-D/2+sw/2,0,-Math.PI/2);
+  P(wz,H,gm,W/2,H/2,0,0,-Math.PI/2);
+  [-wz/2,0,wz/2].forEach(z=>B(.08,H,.1,fm,W/2,H/2,z));B(.1,.1,wz,fm,W/2,H,0);
+  P(BAL,wz,new THREE.MeshStandardMaterial({color:0x8ea3b8,roughness:.85}),W/2+BAL/2,0,0,-Math.PI/2);
+  B(.05,1.1,wz,gm,W/2+BAL,.55,0);[-1,1].forEach(s=>B(BAL,1.1,.05,gm,W/2+BAL/2,.55,s*wz/2));B(.1,.05,wz,fm,W/2+BAL,1.1,0);
+}
+
+function setSun(h){
+  const a=(h-6)/12*Math.PI,s=Math.max(0,Math.sin(a));
+  sun.position.set(8,1.5+6*s,-5*Math.cos(a));sun.intensity=.3+2.2*s;
+  sun.color.set(0xff9a55).lerp(new THREE.Color(0xfff6e8),Math.min(1,s*1.4));amb.intensity=.6+.8*s;
+  $('sun-t').textContent=`${Math.floor(h)}:${h%1?'30':'00'}`;$('sun-i').textContent=Math.round(s*100)+'%';
+}
+
+/* ---------- 程序化家具 (GLB 找不到時的備援) ---------- */
+function proc(f){
+  const g=new THREE.Group(),W=f.w/100,D=f.d/100;
+  const B=(w,h,d,c,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color:c,roughness:.8}));m.position.set(x,y,z);g.add(m);return m};
+  const col=f.c;
+  if(f.t==='sofa'){
+    const cw=(W-1.15)/2;
+    B(W,.42,.95,col,0,.21,-D/2+.475);B(.95,.42,D-.95,col,W/2-.475,.21,-D/2+.95+(D-.95)/2);
+    B(W,.5,.22,'#c4beb4',0,.67,-D/2+.11);B(.2,.3,.95,'#c4beb4',-W/2+.1,.57,-D/2+.475);
+    [0,1].forEach(i=>B(cw,.16,.7,'#ece8e1',-W/2+.2+cw/2+i*cw,.5,-D/2+.58));
+    B(.8,.16,D-1.15,'#ece8e1',W/2-.475,.5,-D/2+.95+(D-.95)/2);
+  }else if(f.t==='chair'){
+    B(.55,.12,.55,col,0,.45,0);B(.55,.5,.1,col,0,.76,-.25);
+    [[-.22,-.22],[.22,-.22],[-.22,.22],[.22,.22]].forEach(p=>B(.05,.4,.05,'#222',p[0],.2,p[1]));
+  }else if(f.t==='lamp'){
+    for(let i=0;i<3;i++){const a=i*2.094,m=new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,1.1,8),new THREE.MeshStandardMaterial({color:col}));
+      m.position.set(Math.sin(a)*.11,.55,Math.cos(a)*.11);m.rotation.set(-.2*Math.cos(a),0,.2*Math.sin(a));g.add(m)}
+    const s=new THREE.Mesh(new THREE.CylinderGeometry(.18,.25,.45,24,1,true),new THREE.MeshStandardMaterial({color:0xfff6e5,emissive:0xffe2a8,emissiveIntensity:.7,side:THREE.DoubleSide}));
+    s.position.y=1.32;g.add(s);
+  }else if(f.t==='table'){
+    const top=new THREE.Mesh(new THREE.CylinderGeometry(1,1,.06,32),new THREE.MeshStandardMaterial({color:col,roughness:.9}));
+    top.scale.set(W/2,1,D/2);top.position.y=.36;g.add(top);
+    const base=new THREE.Mesh(new THREE.CylinderGeometry(1,1,.33,32),new THREE.MeshStandardMaterial({color:'#bdb4a8',roughness:.9}));
+    base.scale.set(W*.34,1,D*.3);base.position.y=.165;g.add(base);
+  }else{
+    B(W,.45,D,col,0,.225,0);B(W*.48,.38,.01,'#8a929c',-W*.25,.225,D/2+.005);B(W*.48,.38,.01,'#8a929c',W*.25,.225,D/2+.005);
+    B(Math.min(W-.3,1.4),.8,.05,'#0b0f19',0,.9,0);
+    if(f.lift)g.position.y=f.lift;
+  }
+  g.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true}});
+  const w=new THREE.Group();w.add(g);return w;
+}
+
+function loadModel(f){
+  return new Promise(res=>{
+    if(bad.has(f.id))return res(null);
+    if(cache[f.id])return res(cache[f.id].clone(true));
+    gl.load(encodeURI(f.glb),g=>{cache[f.id]=g.scene;res(g.scene.clone(true))},undefined,()=>{
+      bad.add(f.id);if(!warned){warned=true;toast('找不到 GLB 模型檔，已改用內建程序化家具')}res(null)});
+  });
+}
+
+/* ---------- 家具操作 ---------- */
+async function addItem(f,x,z,r){
+  const root=new THREE.Group();root.userData={uid:++uid,fid:f.id};
+  let m=await loadModel(f);
+  if(m){
+    m.scale.setScalar(f.sc||1);m.rotation.y=(f.off||0)*Math.PI/180;m.updateMatrixWorld(true);
+    const b=new THREE.Box3().setFromObject(m),c=b.getCenter(new THREE.Vector3());m.position.set(-c.x,-b.min.y,-c.z);
+    m.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true}});
+  }else m=proc(f);
+  root.add(m);
+  root.position.set(x??(Math.random()-.5)*.6,0,z??(Math.random()-.5)*.6);root.rotation.y=(r||0)*Math.PI/180;
+  scene.add(root);items.push(root);clamp(root);stats();return root;
+}
+
+function clamp(o){
+  const b=new THREE.Box3().setFromObject(o),W=room.w,D=room.d,inWin=Math.abs(o.position.z)<D*.275,maxX=W/2+(inWin?BAL-.1:0);
+  let dx=0,dz=0;
+  if(b.min.x<-W/2)dx=-W/2-b.min.x;else if(b.max.x>maxX)dx=maxX-b.max.x;
+  if(b.min.z<-D/2)dz=-D/2-b.min.z;else if(b.max.z>D/2)dz=D/2-b.max.z;
+  o.position.x+=dx;o.position.z+=dz;
+}
+
+function select(o){
+  sel=o;selBox.visible=!!o;
+  $('pill').textContent=o?`已選取：${fOf(o).n}・拖曳移動／雙擊或 ↻ 旋轉`:'點選家具即可拖曳；空白處拖曳旋轉視角';
+}
+function rot(o){if(!o)return;o.rotation.y+=Math.PI/2;clamp(o);stats()}
+function del(o){if(!o)return;scene.remove(o);items.splice(items.indexOf(o),1);if(sel===o)select(null);stats();toast('已移出家具')}
+function clearAll(){while(items.length)scene.remove(items.pop());select(null);stats()}
+
+function stats(){
+  const b=new THREE.Box3(),v=new THREE.Vector3();let a=0,p=0;
+  items.forEach(o=>{b.setFromObject(o).getSize(v);a+=v.x*v.z;p+=fOf(o).price});
+  $('s-n').textContent=items.length;$('s-a').textContent=Math.min(100,Math.round(a/(room.w*room.d)*100))+'%';$('s-p').textContent='NT$ '+p.toLocaleString();
+  FURN.forEach(f=>{const e=$('c-'+f.id);if(e)e.textContent=items.filter(o=>o.userData.fid===f.id).length});
+}
+
+async function aiLayout(st){
+  if(!items.length)for(const id of DEF)await addItem(FURN.find(f=>f.id===id));
+  const W=room.w,D=room.d,S={
+    cozy:{tv:[0,-D/2+.3,0],sofa:[-.3,D/2-1.1,180],table:[0,.1,0],chair:[-W/2+.8,.2,90],lamp:[-W/2+.5,D/2-.5,0]},
+    minimalist:{tv:[0,-D/2+.3,0],sofa:[-W/2+1,.2,90],table:[-.3,.2,90],chair:[W/2-.9,-D/2+.9,315],lamp:[-W/2+.4,-D/2+.4,0]},
+    lounge:{tv:[-W/2+.3,.6,90],sofa:[.2,-D/2+1,0],table:[.4,-.2,0],chair:[1.3,.5,225],lamp:[1.9,.2,0]}}[st],cnt={};
+  items.forEach(o=>{const t=fOf(o).t,n=cnt[t]=(cnt[t]||0)+1,s=S[t];
+    o.position.set(s[0]+(n-1)*.6,0,s[1]+(n-1)*.6);o.rotation.y=s[2]*Math.PI/180;clamp(o)});
+  stats();$('ai-txt').textContent=TXT[st];
+  document.querySelectorAll('.st').forEach(b=>{const on=b.dataset.st===st;b.classList.toggle('on',on);b.classList.toggle('text-cyan-300',on);b.classList.toggle('text-gray-300',!on)});
+}
+
+/* ---------- 互動：點選 / 拖曳 / 旋轉 ---------- */
+function setRay(e){const r=renderer.domElement.getBoundingClientRect();mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mouse,camera)}
+function pick(e){
+  setRay(e);const h=ray.intersectObjects(items,true)[0];if(!h)return null;
+  let o=h.object;while(o&&!o.userData.uid)o=o.parent;return o;
+}
+function bindInput(){
+  const cv=renderer.domElement;
+  cv.addEventListener('pointerdown',e=>{
+    const o=pick(e);down={x:e.clientX,y:e.clientY,hit:!!o};
+    if(o){select(o);ray.ray.intersectPlane(plane,hit);drag={o,dx:o.position.x-hit.x,dz:o.position.z-hit.z};controls.enabled=false}
+  },true);
+  window.addEventListener('pointermove',e=>{
+    if(!drag)return;setRay(e);
+    if(ray.ray.intersectPlane(plane,hit)){drag.o.position.set(hit.x+drag.dx,0,hit.z+drag.dz);clamp(drag.o)}
+  });
+  window.addEventListener('pointerup',e=>{
+    if(drag){drag=null;controls.enabled=true;stats()}
+    else if(down&&!down.hit&&Math.hypot(e.clientX-down.x,e.clientY-down.y)<6)select(null);
+    down=null;
+  });
+  cv.addEventListener('dblclick',e=>rot(pick(e)));
+  cv.addEventListener('wheel',e=>{if(drag){e.preventDefault();drag.o.rotation.y+=(e.deltaY>0?1:-1)*Math.PI/12}},{passive:false});
+  window.addEventListener('keydown',e=>{if(e.key==='Delete'||e.key==='Backspace')del(sel);if(e.key==='r'||e.key==='R')rot(sel)});
+}
+
+/* ---------- 鏡頭預設 ---------- */
+const VIEWS={
+  ov:()=>[[0,3.6,room.d/2+3.4],[0,.5,0]],
+  top:()=>[[0,Math.max(room.w,room.d)*1.5,.01],[0,0,0]],
+  sofa:()=>[[0,1.3,room.d/2-.1],[0,.7,-room.d/2]],
+  bal:()=>[[room.w/2+1.6,1.6,0],[-1,.6,0]]
+};
+function goView(k){const [p,t]=VIEWS[k]();tw={p0:camera.position.clone(),t0:controls.target.clone(),p1:new THREE.Vector3(...p),t1:new THREE.Vector3(...t),k:0}}
+
+/* ---------- UI ---------- */
+function ui(){
+  FURN.forEach(f=>{
+    const b=document.createElement('button');b.className='gb rounded-xl p-2 text-left flex items-center space-x-2';
+    b.innerHTML=`<i class="fa-solid ${f.ic} text-cyan-300 text-lg w-6 text-center"></i><div class="min-w-0 flex-1"><div class="text-[11px] font-bold truncate">${f.n}</div><div class="text-[10px] text-gray-400">NT$ ${f.price.toLocaleString()}・已置入 <b id="c-${f.id}" class="text-cyan-300">0</b></div></div><i class="fa-solid fa-plus text-cyan-400"></i>`;
+    b.onclick=async()=>{const o=await addItem(f);select(o);toast(`已在客廳中央置入 ${f.n}`)};
+    $('p-furn').appendChild(b);
+  });
+  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('[data-tab]').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.classList.toggle('text-cyan-300',on);x.classList.toggle('text-gray-400',!on)});
+    document.querySelectorAll('[data-pn]').forEach(p=>p.classList.toggle('hidden',p.dataset.pn!==b.dataset.tab));
+  });
+  $('tg').onclick=()=>$('bd').classList.toggle('hidden');
+  document.querySelectorAll('.vb').forEach(b=>b.onclick=()=>goView(b.dataset.v));
+  document.querySelectorAll('.st').forEach(b=>b.onclick=()=>aiLayout(b.dataset.st));
+  $('b-rot').onclick=()=>sel?rot(sel):toast('請先點選一件家具');
+  $('b-del').onclick=()=>sel?del(sel):toast('請先點選一件家具');
+  $('sun-r').oninput=e=>setSun(+e.target.value);
+  const resize=()=>{room.w=+$('rw').value;room.d=+$('rd').value;$('rw-v').textContent=room.w.toFixed(1)+' m';$('rd-v').textContent=room.d.toFixed(1)+' m';buildRoom();items.forEach(clamp);stats()};
+  $('rw').oninput=$('rd').oninput=resize;
+  $('b-clr').onclick=()=>{clearAll();toast('已清空客廳')};
+  const dump=()=>JSON.stringify({w:room.w,d:room.d,it:items.map(o=>({id:o.userData.fid,x:+o.position.x.toFixed(2),z:+o.position.z.toFixed(2),r:Math.round(o.rotation.y*180/Math.PI)}))});
+  $('b-save').onclick=()=>{try{localStorage.setItem('ss-room',dump());toast('佈置已儲存')}catch(e){toast('此環境無法儲存')}};
+  $('b-json').onclick=()=>{try{navigator.clipboard.writeText(dump());toast('佈置 JSON 已複製')}catch(e){toast('無法複製')}};
+  $('b-load').onclick=async()=>{
+    let d;try{d=JSON.parse(localStorage.getItem('ss-room'))}catch(e){}
+    if(!d)return toast('沒有已儲存的佈置');
+    clearAll();$('rw').value=d.w;$('rd').value=d.d;resize();
+    for(const i of d.it){const f=FURN.find(x=>x.id===i.id);if(f)await addItem(f,i.x,i.z,i.r)}
+    toast('已讀取佈置');
+  };
+}
+
+window.addEventListener('load',async()=>{init();ui();select(null);await aiLayout('cozy');toast('點選家具後可拖曳；在「家具庫」加入更多')});
+</script>
 </body>
 </html>
